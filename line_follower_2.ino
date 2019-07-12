@@ -25,14 +25,6 @@
  *                  
  ************************************************************************/
 
-
-/************************************************************************
-* DEFINITIONS AND MACROS
-*************************************************************************/
-#define VERSION "1.0"
-#define DEBUG /*keep this line to compile debug comments*/
-
-
 /************************************************************************
 * Arduino Hardware Connections
 *************************************************************************/
@@ -45,8 +37,12 @@ const int PWMB=6;
 const int BI1=7;
 const int BI2=8;
 
+/*built in LED*/
+const int BUILT_IN_LED=13;
+
 /*digital inputs*/
-const int START_STOP_BUTTON=9;
+const int START_BUTTON=9;
+const int BUMPER=10;
 
 /*analog input channels*/
 const int LEFT_LIGHT_SENSOR=0;
@@ -66,6 +62,12 @@ const int SPEED_TURNING_INSIDE=50; //speed of the inside wheel during a turn
 void stopMotors();
 void moveForward();
 void steerLeft();
+void testMotors();
+void testSensors();
+void waitForStartButtonPress();
+int rightSensorOnTrack();
+int leftSensorOnTrack();
+
 
 /************************************************************************
 * SETUP FUNCTION
@@ -73,9 +75,7 @@ void steerLeft();
 void setup() {
   
   /*setup serial port for debugging*/
-  #ifdef DEBUG
-    Serial.begin(9600);
-  #endif
+  Serial.begin(9600);
   
   /*configuring digital IO pins*/
   pinMode(PWMA,OUTPUT);
@@ -84,21 +84,22 @@ void setup() {
   pinMode(PWMB,OUTPUT);
   pinMode(BI1,OUTPUT);
   pinMode(BI2,OUTPUT);
-  pinMode(START_STOP_BUTTON,INPUT);
+  pinMode(START_BUTTON,INPUT);
+  pinMode(BUMPER,OUTPUT);
+  pinMode(BUILT_IN_LED,OUTPUT);
+
+  /*test motors by running them back and forth*/
+  testMotors();
+
+  /*test the reflectance sensors*/
+  testSensors();
+
+  /*turn on the built in LED*/
 
   
-  /*stop the motors*/
-  stopMotors();
-
-  /*forward*/
-  moveForward();
-  delay(2000);
-  stopMotors();
-
-  /*left turn*/
-  steerLeft();
-  delay(2000);
-  stopMotors();
+  /*wait for the button to be pressed*/
+  waitForStartButtonPress();
+  
 }
 
 
@@ -106,8 +107,33 @@ void setup() {
 * MAIN LOOP
 *************************************************************************/
 void loop() {
-  // put your main code here, to run repeatedly:
+  
+  moveForward();
 
+  /*test if the bumper has been pressed*/
+  if(!digitalRead(BUMPER)){
+    Serial.println("Bumper pressed");
+    stopMotors();
+    waitForStartButtonPress();   
+  }
+  
+  /* test if we have encountered a station*/
+  if(leftSensorOnTrack() && rightSensorOnTrack){
+    Serial.println("Reached Station");
+    stopMotors();
+    waitForStartButtonPress();
+  } 
+  else {
+
+    /*test if the left sensor is on the track*/
+    if(leftSensorOnTrack()){
+      steerLeft();
+    }
+
+    if(rightSensorOnTrack()){
+      steerRight();
+    }
+  }  
 }
 
 
@@ -126,11 +152,8 @@ void stopMotors(){
   digitalWrite(BI1,LOW);
   digitalWrite(BI2,LOW);
 
-  #ifdef DEBUG
-    Serial.println("motors stopped");
-  #endif
-  
-}
+  Serial.println("motors stopped");
+ }
 
 
 /*************************************************************************
@@ -151,10 +174,7 @@ void moveForward(){
   digitalWrite(BI1,HIGH);
   digitalWrite(BI2,LOW);
 
-  #ifdef DEBUG
-    Serial.println("moving forward");
-  #endif
-  
+  Serial.println("moving forward");
 }
 
 
@@ -176,9 +196,100 @@ void steerLeft(){
   digitalWrite(BI1,HIGH);
   digitalWrite(BI2,LOW);
 
-  #ifdef DEBUG
-    Serial.println("steering left");
-  #endif  
+  Serial.println("steering left"); 
+}
+
+/*************************************************************************
+* Function name      : steerRight()
+* returns            : void
+* Description        : Steers the robot to the right by slowing the wheel
+*                       on the inside of the turn to SPEED_TURNING_INSIDE
+* Notes              : 
+**************************************************************************/
+void steerRight(){
+
+  //put your code to steer the robot to the right here
+}
+
+/*************************************************************************
+* Function name      : testMotors()
+* returns            : void
+* Description        : Runs the motors back and forth for the self test routine
+* Notes              : 
+**************************************************************************/
+void testMotors(){
+  /*run both motors forward for 2 seconds*/
+
+  /*run both motors in reverse for 2 seconds*/
+  
+}
+
+/*************************************************************************
+* Function name      : testSensors()
+* returns            : void
+* Description        : Tests if the reflectance sensors are producing values
+*                       within acceptable limits
+* Notes              : 
+**************************************************************************/
+void testSensors(){
+
+  int rightSensorFault;
+  int leftSensorFault;
+  
+ 
+  /* test the right sensor*/
+  rightSensorFault=(analogRead(RIGHT_LIGHT_SENSOR)>1000 || analogRead(RIGHT_LIGHT_SENSOR)<50); 
+
+  if(rightSensorFault){
+    Serial.println("Right reflectance sensor faulty");
+  }
+
+  /*test the left sensor*/
+  leftSensorFault=(analogRead(LEFT_LIGHT_SENSOR)>1000 || analogRead(LEFT_LIGHT_SENSOR)<50);  
+
+  if(leftSensorFault){
+    Serial.println("left reflectance sensor faulty");
+  }
+
+  if(rightSensorFault || leftSensorFault){
+    /* enter infinite loop and flash the built-in-led twice per second */
+    while(1){
+      //write your code to flash the led here
+    }    
+  }
 }
 
 
+/*************************************************************************
+* Function name      : waitForStartButtonPress()
+* returns            : void
+* Description        : waits until the start button is pressed
+* Notes              : 
+**************************************************************************/
+void waitForStartButtonPress(){
+  //write code to wait until the start button is pressed before continuing
+  
+}
+
+/*************************************************************************
+* Function name      : rightSensorOnTrack()
+* returns            : int
+* Description        : returns 1 if the sensor is over the black track
+* Notes              : 
+**************************************************************************/
+int rightSensorOnTrack(){
+  //write code return 1 if the sensor if over the black track
+  
+}
+
+
+/*************************************************************************
+* Function name      : leftSensorOnTrack()
+* returns            : int
+* Description        : returns 1 if the sensor is over the black track
+* Notes              : 
+**************************************************************************/
+int leftSensorOnTrack(){
+  //write code return 1 if the sensor if over the black track
+  
+}
