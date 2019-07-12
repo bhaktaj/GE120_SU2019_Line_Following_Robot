@@ -61,6 +61,7 @@ const int SPEED_TURNING_INSIDE=50; //speed of the inside wheel during a turn
 *************************************************************************/
 void stopMotors();
 void moveForward();
+void moveBackwards();
 void steerLeft();
 void testMotors();
 void testSensors();
@@ -118,7 +119,7 @@ void loop() {
   }
   
   /* test if we have encountered a station*/
-  if(leftSensorOnTrack() && rightSensorOnTrack){
+  if(leftSensorOnTrack() && rightSensorOnTrack()){
     Serial.println("Reached Station");
     stopMotors();
     waitForStartButtonPress();
@@ -177,7 +178,17 @@ void moveForward(){
   Serial.println("moving forward");
 }
 
-
+/*************************************************************************
+* Function name      : moveBackwards()
+* returns            : void
+* Description        : Moves the robot in the backward direction
+* Notes              : The speed of the motors is set by the SPEED global 
+*                      variable
+**************************************************************************/
+void moveBackwards(){
+  //put your code to move the robot backwards here   
+}  
+  
 /*************************************************************************
 * Function name      : steerLeft()
 * returns            : void
