@@ -86,7 +86,7 @@ void setup() {
   pinMode(BI1,OUTPUT);
   pinMode(BI2,OUTPUT);
   pinMode(START_BUTTON,INPUT);
-  pinMode(BUMPER,OUTPUT);
+  pinMode(BUMPER,INPUT);
   pinMode(BUILT_IN_LED,OUTPUT);
 
   /*test motors by running them back and forth*/
@@ -108,9 +108,7 @@ void setup() {
 * MAIN LOOP
 *************************************************************************/
 void loop() {
-  
-  moveForward();
-
+   
   /*test if the bumper has been pressed*/
   if(!digitalRead(BUMPER)){
     Serial.println("Bumper pressed");
@@ -133,6 +131,10 @@ void loop() {
 
     if(rightSensorOnTrack()){
       steerRight();
+    }
+    
+    if(!rightSensorOnTrack() && !leftSensorOnTrack()){
+      moveForward();
     }
   }  
 }
@@ -279,6 +281,10 @@ void testSensors(){
 **************************************************************************/
 void waitForStartButtonPress(){
   //write code to wait until the start button is pressed before continuing
+  //this is also a good place to add code to use the serial port to print
+  //the values of the light sensors to assist with tuning the threshold 
+  //value to determine if the sensor is over a dark track or the white 
+  //background
   
 }
 
